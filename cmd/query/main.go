@@ -38,19 +38,18 @@ func handler(c echo.Context) error {
 			cerr := echo.NewHTTPError(http.StatusInternalServerError, "Error: SetTimeLastVisit: "+err2.Error())
 			return cerr.Unwrap()
 		}
-		c.String(http.StatusOK, "Hello, "+name)
+		return c.String(http.StatusOK, "Hello, "+name)
 	} else if err != nil {
 		cerr := echo.NewHTTPError(http.StatusInternalServerError, "Error: GetTimeLastVisit: "+err.Error())
 		return cerr.Unwrap()
 	} else {
-		c.String(http.StatusOK, "Hello, "+name+" . your last visit was in "+time)
 		err = cc.dbProvider.UpdateTimeLastVisit(name)
 		if err != nil {
 			cerr := echo.NewHTTPError(http.StatusInternalServerError, "Error: UpdateTimeLastVisit: "+err.Error())
 			return cerr.Unwrap()
 		}
+		return c.String(http.StatusOK, "Hello, "+name+" . your last visit was in "+time)
 	}
-	return nil
 }
 
 func (dp *DatabaseProvider) GetTimeLastVisit(name string) (string, error) {
@@ -96,5 +95,8 @@ func main() {
 		}
 	})
 	e.GET("/api/user", handler)
-	e.Start(*address)
+	err = e.Start(*address)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
